@@ -593,3 +593,413 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// ============================================
+// ADMINISTRATIVE SERVICES SECTION - JAVASCRIPT
+// Enhanced Interactivity and Animations
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ============================================
+    // INTERSECTION OBSERVER FOR SCROLL ANIMATIONS
+    // ============================================
+    
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    // Animate service items on scroll
+    const serviceItems = document.querySelectorAll('.service-item');
+    
+    const serviceObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                // Add staggered animation delay
+                setTimeout(() => {
+                    entry.target.classList.add('animate-in');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+                
+                serviceObserver.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Initial state for service items
+    serviceItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        serviceObserver.observe(item);
+    });
+
+    // Animate section title and subtitle
+    const sectionTitle = document.querySelector('.services .section-title');
+    const sectionSubtitle = document.querySelector('.services .section-subtitle');
+    
+    const titleObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-title');
+                titleObserver.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    if (sectionTitle) titleObserver.observe(sectionTitle);
+    if (sectionSubtitle) titleObserver.observe(sectionSubtitle);
+
+    // ============================================
+    // INTERACTIVE HOVER EFFECTS
+    // ============================================
+    
+    serviceItems.forEach(item => {
+        const icon = item.querySelector('.service-icon');
+        const title = item.querySelector('h3');
+        const description = item.querySelector('p');
+        
+        // Mouse move effect for 3D tilt
+        item.addEventListener('mousemove', (e) => {
+            const rect = item.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            item.style.transform = `
+                perspective(1000px) 
+                rotateX(${rotateX}deg) 
+                rotateY(${rotateY}deg) 
+                translateY(-5px)
+                scale(1.02)
+            `;
+        });
+        
+        // Reset on mouse leave
+        item.addEventListener('mouseleave', () => {
+            item.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+        });
+        
+        // Click effect with ripple
+        item.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // ============================================
+    // DYNAMIC COUNTER ANIMATION
+    // ============================================
+    
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(start);
+            }
+        }, 16);
+    }
+
+    // Add counters to service items (if needed)
+    const addServiceStats = () => {
+        const stats = [
+            { value: 40, suffix: '%', label: 'Efficiency Increase' },
+            { value: 500, suffix: '+', label: 'Documents Processed' },
+            { value: 95, suffix: '%', label: 'Team Satisfaction' },
+            { value: 30, suffix: '%', label: 'Cost Reduction' },
+            { value: 100, suffix: '+', label: 'Systems Integrated' },
+            { value: 24, suffix: '/7', label: 'Support Available' }
+        ];
+
+        serviceItems.forEach((item, index) => {
+            if (stats[index]) {
+                const statDiv = document.createElement('div');
+                statDiv.className = 'service-stat';
+                statDiv.innerHTML = `
+                    <span class="stat-number" data-target="${stats[index].value}">0</span>
+                    <span class="stat-suffix">${stats[index].suffix}</span>
+                    <span class="stat-label">${stats[index].label}</span>
+                `;
+                item.insertBefore(statDiv, item.querySelector('p'));
+            }
+        });
+
+        // Observe and animate stats
+        const statNumbers = document.querySelectorAll('.stat-number');
+        const statObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = parseInt(entry.target.dataset.target);
+                    animateCounter(entry.target, target);
+                    statObserver.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        statNumbers.forEach(stat => statObserver.observe(stat));
+    };
+
+    // Uncomment to add stats
+    // addServiceStats();
+
+    // ============================================
+    // PARALLAX SCROLLING EFFECT
+    // ============================================
+    
+    let ticking = false;
+    function updateParallax() {
+        const scrolled = window.pageYOffset;
+        const servicesSection = document.querySelector('.services');
+        
+        if (servicesSection) {
+            const rect = servicesSection.getBoundingClientRect();
+            const speed = 0.5;
+            
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                const yPos = -(scrolled * speed);
+                servicesSection.style.backgroundPositionY = `${yPos}px`;
+            }
+        }
+        
+        ticking = false;
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', requestTick);
+
+    // ============================================
+    // FILTER/SEARCH FUNCTIONALITY
+    // ============================================
+    
+    function addSearchFilter() {
+        const servicesSection = document.querySelector('.services .section-content');
+        const servicesGrid = document.querySelector('.services-grid');
+        
+        if (servicesSection && servicesGrid) {
+            // Create search bar
+            const searchContainer = document.createElement('div');
+            searchContainer.className = 'services-search';
+            searchContainer.innerHTML = `
+                <input type="text" 
+                       id="serviceSearch" 
+                       placeholder="Search services..." 
+                       class="service-search-input">
+                <div class="search-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                </div>
+            `;
+            
+            // Insert search bar after subtitle
+            const subtitle = document.querySelector('.section-subtitle');
+            if (subtitle) {
+                subtitle.parentNode.insertBefore(searchContainer, subtitle.nextSibling);
+            }
+            
+            // Search functionality
+            const searchInput = document.getElementById('serviceSearch');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                serviceItems.forEach(item => {
+                    const title = item.querySelector('h3').textContent.toLowerCase();
+                    const description = item.querySelector('p').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                        item.style.display = 'block';
+                        item.classList.add('fade-in');
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.remove('fade-in');
+                    }
+                });
+                
+                // Show "no results" message if needed
+                const visibleItems = Array.from(serviceItems).filter(item => 
+                    item.style.display !== 'none'
+                );
+                
+                let noResultsMsg = document.querySelector('.no-results-message');
+                if (visibleItems.length === 0) {
+                    if (!noResultsMsg) {
+                        noResultsMsg = document.createElement('div');
+                        noResultsMsg.className = 'no-results-message';
+                        noResultsMsg.textContent = 'No services found matching your search.';
+                        servicesGrid.appendChild(noResultsMsg);
+                    }
+                } else if (noResultsMsg) {
+                    noResultsMsg.remove();
+                }
+            });
+        }
+    }
+
+    // Uncomment to add search functionality
+    // addSearchFilter();
+
+    // ============================================
+    // TOOLTIP ON HOVER
+    // ============================================
+    
+    function addTooltips() {
+        const serviceIcons = document.querySelectorAll('.service-icon');
+        
+        serviceIcons.forEach((icon, index) => {
+            const tooltips = [
+                'Click to learn more about process optimization',
+                'Explore our document management solutions',
+                'Discover team coordination strategies',
+                'View time and resource planning tools',
+                'Learn about systems integration',
+                'Check out our training programs'
+            ];
+            
+            icon.setAttribute('data-tooltip', tooltips[index] || 'Learn more');
+            
+            icon.addEventListener('mouseenter', function(e) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'service-tooltip';
+                tooltip.textContent = this.getAttribute('data-tooltip');
+                
+                document.body.appendChild(tooltip);
+                
+                const rect = this.getBoundingClientRect();
+                tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+                
+                setTimeout(() => {
+                    tooltip.classList.add('visible');
+                }, 10);
+            });
+            
+            icon.addEventListener('mouseleave', function() {
+                const tooltip = document.querySelector('.service-tooltip');
+                if (tooltip) {
+                    tooltip.classList.remove('visible');
+                    setTimeout(() => {
+                        tooltip.remove();
+                    }, 300);
+                }
+            });
+        });
+    }
+
+    // Uncomment to add tooltips
+    // addTooltips();
+
+    // ============================================
+    // SMOOTH SCROLL TO SECTION
+    // ============================================
+    
+    const servicesLinks = document.querySelectorAll('a[href="#services"]');
+    servicesLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const servicesSection = document.getElementById('services');
+            if (servicesSection) {
+                servicesSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // ============================================
+    // LOADING ANIMATION
+    // ============================================
+    
+    function addLoadingAnimation() {
+        const servicesSection = document.querySelector('.services');
+        if (servicesSection) {
+            servicesSection.classList.add('services-loading');
+            
+            setTimeout(() => {
+                servicesSection.classList.remove('services-loading');
+                servicesSection.classList.add('services-loaded');
+            }, 500);
+        }
+    }
+
+    addLoadingAnimation();
+
+    // ============================================
+    // RESPONSIVE MENU FOR SERVICES
+    // ============================================
+    
+    function checkMobileView() {
+        if (window.innerWidth <= 768) {
+            serviceItems.forEach(item => {
+                item.addEventListener('touchstart', function() {
+                    this.classList.add('touch-active');
+                });
+                
+                item.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.classList.remove('touch-active');
+                    }, 300);
+                });
+            });
+        }
+    }
+
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+
+    // ============================================
+    // PERFORMANCE OPTIMIZATION
+    // ============================================
+    
+    // Debounce function for scroll events
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Optimize scroll events
+    const optimizedScroll = debounce(requestTick, 10);
+    window.removeEventListener('scroll', requestTick);
+    window.addEventListener('scroll', optimizedScroll);
+
+});
